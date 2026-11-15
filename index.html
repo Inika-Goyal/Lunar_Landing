@@ -788,7 +788,7 @@ body.compare #skylabels,body.method #skylabels,body.menu #skylabels{opacity:0}
     <button class="btn" type="button" id="modelClose">Close</button>
   </div>
   <h2>A tabletop Moon</h2>
-  <p>An Arduino drives a turntable and two servo arms carrying a Sun LED and an Earth LED around a 3D-printed site. Sensors on the lander report whether the light and the Earth signal actually reach it, and the app checks that against its prediction.</p>
+  <p>An Arduino drives a turntable and a servo arm carrying a Sun LED around a 3D-printed site. A light sensor on the lander reports whether the Sun actually reaches it, and the app checks that against its prediction. An Earth LED lights when the app predicts a radio link to Earth.</p>
   <div class="grp">
     <div class="eyebrow">Link</div>
     <p id="mdStatus" style="margin-top:8px">Not connected. Web Serial works in Chrome and Edge on desktop.</p>
@@ -2053,8 +2053,9 @@ function onSerialLine(line) {
   }
   updateCheck();
 }
-function modelLit() { const r = serial.rx; if (!r) return null; return (CFG.ambientSub ? r.sunLight - r.ambient : r.sunLight) > CFG.litThr; }
-function modelComms() { const r = serial.rx; if (!r) return null; return r.earthSignal > CFG.earthThr; }
+// a sensor the build doesn't have is reported as -1
+function modelLit() { const r = serial.rx; if (!r) return null; return (CFG.ambientSub && r.ambient >= 0 ? r.sunLight - r.ambient : r.sunLight) > CFG.litThr; }
+function modelComms() { const r = serial.rx; if (!r || r.earthSignal < 0) return null; return r.earthSignal > CFG.earthThr; }
 function updateCheck() {
   const el = $('#check'); if (!port) return;
   const p = pt(), ml = modelLit(), mc = modelComms();
@@ -2062,7 +2063,8 @@ function updateCheck() {
   const ok = ml === !!p.lit, okc = mc === !!p.comms;
   const pct = serial.total ? Math.round(100 * serial.agree / serial.total) : 0;
   el.innerHTML = `Predicted: <b>${p.lit ? 'sunlit' : 'shadow'}</b> · Model: <b>${ml ? 'sunlit' : 'shadow'}</b> ${ok ? '✓' : '<span class="alert">✕</span>'}<br>` +
-    `Predicted: <b>${p.comms ? 'link' : 'blocked'}</b> · Model: <b>${mc ? 'link' : 'blocked'}</b> ${okc ? '✓' : '<span class="alert">✕</span>'}<br>Agreement ${pct}% over ${serial.total} readings`;
+    (mc == null ? `Earth link: <b>${p.comms ? 'link' : 'blocked'}</b> (shown on the Earth LED)<br>` :
+    `Predicted: <b>${p.comms ? 'link' : 'blocked'}</b> · Model: <b>${mc ? 'link' : 'blocked'}</b> ${okc ? '✓' : '<span class="alert">✕</span>'}<br>`) + `Agreement ${pct}% over ${serial.total} readings`;
 }
 async function serialFlush(now) {
   const a = angles();

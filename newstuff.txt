@@ -1,0 +1,14 @@
+// ---------------------------------------------------------------- pins
+const uint8_t STEP_PINS[4] = {8, 9, 10, 11};
+const uint8_t PIN_SUN_SERVO   = 2;
+const uint8_t PIN_EARTH_SERVO = 4;// dont have
+const uint8_t PIN_SUN_LED     = 3;
+const uint8_t PIN_EARTH_LED   = 5;
+const uint8_t PIN_BATT_LED    = 7; // dont have
+const uint8_t PIN_PRED_LED    = 13;// dont have
+const uint8_t PIN_BUTTON      = 4;
+const uint8_t PIN_IR          = 12; // dont have
+const uint8_t PIN_SUN_SENSOR   = A1;
+const uint8_t PIN_EARTH_SENSOR = A2;// dont have
+const uint8_t PIN_AMBIENT      = A3; // dont have
+const uint8_t PIN_KNOB         = A0;

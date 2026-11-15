@@ -2,6 +2,24 @@
 
 Lunar Landing Site Navigator, NASA Space Apps 2026. Open `index.html` through a local web server (it loads `sites.json`).
 
+## Data
+
+- `sites.json` is built by `tools/build-sites.mjs` from NASA's LRO LOLA polar elevation model (LDEM_75S_240M, PDS Geosciences) and the JPL Horizons API: a 360° horizon, an hourly Sun/Earth timeline (Dec 2026 – Jan 2027), metrics and comms windows for 4 sites.
+- `tools/nasa-illum.mjs` adds NASA's long-term average illumination at each site, from the LOLA polar illumination maps (NASA GSFC PGDA product 69, Mazarico et al. 2011). Each site's details compare it with our own % sunlit.
+
+| Site | Ours (60 days) | NASA 18.6-yr average | NASA best spot within 240 m |
+|---|---|---|---|
+| Connecting Ridge | 100% | 60.3% | 82.3% |
+| Peak Near Shackleton | 98.0% | 58.9% | 79.9% |
+| de Gerlache Rim 1 | 100% | 44.9% | 75.9% |
+| Malapert Massif | 95.0% | 57.0% | 66.0% |
+
+Ours is higher because our window is southern lunar summer; NASA's average includes the winter months when these ridges lose the Sun for days.
+
+## Crater template
+
+`templates/malapert-massif-crater-template.pdf` is a printable base disc and crater wall for the model, traced from Malapert Massif's real horizon (heights ×10). Print at 100% on Letter paper; the build steps are on page 1. Make one for another site with `node tools/build-template.mjs site_a` (site_a … site_d).
+
 ## Tabletop model (Arduino)
 
 Sketch: `arduino/lunar_model/lunar_model.ino` (Uno or Nano, needs the Servo library). It talks to the app over Web Serial at 115200 baud: press **Connect model** in the app.
@@ -30,5 +48,5 @@ Not used in this build: Earth servo, Earth sensor, ambient sensor, battery LED, 
 
 1. Power up with the Sun arm pointing at the model's north mark (that is 0°; there is no home switch).
 2. In the app open Menu → The Model, connect, and watch the RX line.
-3. Set the Lit threshold halfway between the sensor reading in light and in shadow. Untick "Subtract ambient light".
+3. Set the Lit threshold halfway between the sensor reading in light and in shadow. Leave "Subtract ambient light" off (no ambient sensor). With the crater template, the lander sensor height s is 6 cm (the app's default).
 4. If the arm moves the wrong way flip `SUN_DIR`; if the turntable spins the wrong way set `TURN_DIR` to `-1` (top of the sketch).

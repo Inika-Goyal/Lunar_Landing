@@ -728,7 +728,7 @@ body.compare #skylabels,body.method #skylabels,body.menu #skylabels{opacity:0}
     </ol>
     <p class="note" id="dataNote"></p>
     <h3>NASA comparison</h3>
-    <p>When a site has <code>nasaIllumPct</code>, the site sheet shows our percent sunlit next to NASA's average illumination value for the same point (LOLA-derived polar illumination maps). A large gap means the horizon, the time span or the coordinates need checking. Our window is 60 days, while NASA's maps average over many years, so some gap is expected.</p>
+    <p>When a site has <code>nasaIllumPct</code>, the site sheet shows our percent sunlit next to NASA's average illumination value for the same point (LOLA-derived polar illumination maps). NASA's value comes from the LOLA polar illumination map (Mazarico et al. 2011, NASA GSFC PGDA), which averages the visible fraction of the Sun hourly over an 18.6-year cycle at 60 m per pixel. Ours covers one 60-day window in southern lunar summer, when the Sun stays highest at the pole, so ours is expected to be higher: NASA's average also includes the winter months when these ridges lose the Sun for days. Our site points come from a 240 m grid, so the sheet also shows the best-lit 60 m spot within 240 m.</p>
     <h3>Limitations</h3>
     <ul>
       <li><b>Terrain extent.</b> Distant peaks beyond the sampled area are missing, which makes horizons look too low and sunlight too generous.</li>
@@ -741,7 +741,8 @@ body.compare #skylabels,body.method #skylabels,body.menu #skylabels{opacity:0}
     <h3>Sources</h3>
     <ul>
       <li><a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">JPL Horizons</a>: Sun and Earth ephemerides.</li>
-      <li><a href="https://pgda.gsfc.nasa.gov/" target="_blank" rel="noopener">LRO LOLA terrain data</a> and NASA ADC Artemis III candidate region files: elevation and horizons.</li>
+      <li><a href="https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/" target="_blank" rel="noopener">LRO LOLA polar elevation model LDEM_75S_240M</a> (NASA PDS Geosciences): elevation and 360° horizons.</li>
+      <li><a href="https://pgda.gsfc.nasa.gov/products/69" target="_blank" rel="noopener">LOLA polar illumination maps</a> (NASA GSFC PGDA; Mazarico et al. 2011, Icarus 211): the NASA comparison value.</li>
       <li><a href="https://quickmap.lroc.asu.edu/" target="_blank" rel="noopener">LROC Quickmap</a>: site inspection.</li>
       <li><a href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener">NASA Moon Trek</a>: site inspection.</li>
       <li><a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">NASA SVS CGI Moon Kit</a>: LROC colour map and LOLA height map on the globe.</li>
@@ -1040,7 +1041,7 @@ let toastT;
 function toast(msg, ms = 4200) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms); }
 
 /* ================================================================ settings */
-const CFG_DEFAULT = { litThr: 500, earthThr: 500, ambientSub: true, s: 1.5, k: 10, sunD: 20, sunP: 8, sunL: 12, earthD: 20, earthP: 8, earthL: 12, charge: 4, drain: 1.6 };
+const CFG_DEFAULT = { litThr: 500, earthThr: 500, ambientSub: false, s: 6, k: 10, sunD: 20, sunP: 8, sunL: 12, earthD: 20, earthP: 8, earthL: 12, charge: 4, drain: 1.6 };
 let CFG = Object.assign({}, CFG_DEFAULT);
 try { Object.assign(CFG, JSON.parse(localStorage.getItem('lln.cfg') || '{}')); } catch (e) { }
 function saveCfg() { try { localStorage.setItem('lln.cfg', JSON.stringify(CFG)); } catch (e) { } }
@@ -1650,7 +1651,9 @@ function fillSheet() {
   $('#shDark').innerHTML = `${s.metrics.longestDarkHrs}<small>h</small>`;
   $('#shComms').innerHTML = `${s.metrics.pctComms.toFixed(1)}<small>%</small>`;
   const nasa = $('#shNasa');
-  if (s.nasaIllumPct != null) { nasa.hidden = false; nasa.innerHTML = `<span class="k">vs NASA illumination map:</span> <span class="num">${Number(s.nasaIllumPct).toFixed(1)}%</span> <span class="k">(ours ${s.metrics.pctSunlit.toFixed(1)}%)</span>`; }
+  if (s.nasaIllumPct != null) { nasa.hidden = false; nasa.innerHTML = `<span class="k">vs NASA illumination map (18.6-yr average):</span> <span class="num">${Number(s.nasaIllumPct).toFixed(1)}%</span>` +
+    (s.nasaIllumBestNearbyPct != null ? ` <span class="k">· best spot within 240 m</span> <span class="num">${Number(s.nasaIllumBestNearbyPct).toFixed(1)}%</span>` : '') +
+    ` <span class="k">· ours ${s.metrics.pctSunlit.toFixed(1)}% over this 60-day window</span>`; }
   else nasa.hidden = true;
   const q = $('#shQuick'), t = $('#shTrek');
   q.href = s.quickmapUrl || 'https://quickmap.lroc.asu.edu/'; t.href = s.moonTrekUrl || 'https://trek.nasa.gov/moon/';
